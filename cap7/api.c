@@ -28,3 +28,10 @@ struct stat{
 int chmod(const char* path, mode_t mode);
 int fchmod(int fd, mode_t mode);
 
+/************文件所有者***************/
+#include<sys/types.h>
+#include<unistd.h>
+int chown(const char *path, uid_t owner, gid_t group); /* 文件路径 */
+int lchown(const char *path, uid_t owner, git_t group); /* 链接文件 */
+int fchown(int fd, uid_t owner, git_t group); /* 文件句柄 */
+
