@@ -9,7 +9,7 @@
 void main(int argc, char* argv[])
 {
     int fd, ret;
-    int i = 0;
+    int i;
     ssize_t len;
     char buf[BUFSIZ] = {'\0',};
     struct inotify_event *event;
@@ -44,26 +44,29 @@ void main(int argc, char* argv[])
     }
 
     ret = inotify_add_watch(fd, argv[1], IN_ALL_EVENTS);
-            //IN_ACCESS | IN_MODIFY | IN_OPEN | IN_CLOSE);
+    //IN_ACCESS | IN_MODIFY | IN_OPEN | IN_CLOSE);
     if (ret == -1)
     {
         log("inotify_add_watch");
         exit(EXIT_FAILURE);
     }
 
-    len = read(fd, buf, BUFSIZ);
-    while (i < len)
+    while (1)
     {
-        event = (struct inotify_event *)&buf;
-        printf("i=%d wd=%d mask=%d, cookie=%d len=%d dir=%s\n",
-                i, event->wd, event->mask, event->cookie, 
-                event->len, (event->mask & IN_ISDIR) ? "yes" : "no");
-        if (event->len)
+        i = 0;
+        len = read(fd, buf, BUFSIZ);
+        while (i < len)
         {
-            printf("name=%s: %s\n", event->name, event_str[i]);
+            event = (struct inotify_event *)&buf;
+            printf("i=%d wd=%d mask=%d, cookie=%d len=%d dir=%s\n",
+                    i, event->wd, event->mask, event->cookie, 
+                    event->len, (event->mask & IN_ISDIR) ? "yes" : "no");
+            if (event->len)
+            {
+                printf("name=%s: %s\n", event->name, event_str[i]);
+            }
+            i += sizeof(struct inotify_event) + event->len;
         }
-        i += sizeof(struct inotify_event) + event->len;
     }
 
-//    unlink(argv[1]);
 }
