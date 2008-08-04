@@ -147,3 +147,82 @@ int readdir(unsigned int fd, struct dirent* dirp
 int getdents(unsigned int fd, struct dirent* dirp
         unsigned int count);
 
+
+/************************链接***********************/
+/* 硬链接: */
+#include<unistd.h>
+int link(const char* oldpath, const char* newpath);
+
+/* 符号链接 */
+#include<unistd.h>
+int symlink(const char* oldpath, const char* newpath);
+
+/* 解除链接(删除文件) */
+#include<unistd.h>
+int unlink(const char* path);
+
+/* 移动文件 */
+#include<stdio.h>
+int rename(const char* oldpath, const char* newpath);
+
+/***********************带外通信*********************/
+#include<sys/ioctl.h>
+int ioctl(int fd, int request, ...);
+
+
+/*******************************监视文件***********************/
+/* inotify初始化: */
+#include<inotify.h>
+int inotify_init(void);
+
+/* 新增监视: */
+#include<inotify.h>
+int inotify_add_watch(int fd, const char* path, uint32_t mask);
+/* mask:
+ * IN_ACCESS
+ * IN_MODIFY
+ * IN_ATTRIB
+ * IN_CLOSE_WRITE
+ * IN_CLOSE_NOWRITE
+ * IN_OPEN
+ * IN_MOVED_FROM
+ * IN_MOVED_TO
+ * IN_CREATE
+ * IN_DELETE
+ * IN_DELETE_SELF
+ * IN_MOVE_SELF
+ * IN_ALL_EVENTS
+ * IN_CLOSE
+ * IN_MOVE
+ *
+ * 高级事件:
+ * IN_IGNORED
+ * IN_ISDIR
+ * IN_Q_OVERFLOW
+ * IN_UNMOUNT
+ *
+ * IN_DONT_FOLLOW
+ * IN_MASK_ADD
+ * IN_ONESHOT
+ * IN_ONLYDIR
+ */
+
+/* inotify_event: */
+#include<inotify.h>
+struct inotify_event {
+    int wd;
+    uint32_t mask;
+    uint32_t cookie;
+    uint32_t len;
+    char name[];
+}
+
+/* 删除监视事件: */
+#include<inotify.h>
+int inotify_rm_watch(int fd, uint32_t wd);
+
+/* 获取事件队列大小 */
+ioctl(fd, FIONREAD, &queue_len);
+
+/* 关闭监视实例 */
+close(fd);

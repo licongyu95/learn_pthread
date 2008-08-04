@@ -5,6 +5,7 @@
 #include<fcntl.h>
 #include<unistd.h>
 #include<stdlib.h>
+#include<sys/ioctl.h>
 
 void main(int argc, char* argv[])
 {
@@ -13,6 +14,7 @@ void main(int argc, char* argv[])
     ssize_t len;
     char buf[BUFSIZ] = {'\0',};
     struct inotify_event *event;
+    unsigned int queue_len;
 
     char *event_str[] = {  
         "IN_ACCESS",  
@@ -54,6 +56,14 @@ void main(int argc, char* argv[])
     while (1)
     {
         i = 0;
+        ret = ioctl(fd, FIONREAD, &queue_len);
+        if (ret < 0)
+        {
+            log("ioctl fionread");
+            exit(EXIT_FAILURE);
+        }
+        printf("%u bytes pending in queue.\n",
+                queue_len);
         len = read(fd, buf, BUFSIZ);
         while (i < len)
         {
