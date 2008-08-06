@@ -11,6 +11,7 @@ void main(int argc, char* argv[])
     fd = open("abc", O_RDONLY);
     if (fd < 0)
     {
-        log("open");
+        log_exit("open");
     }
+    printf("open success.\n");
 }
