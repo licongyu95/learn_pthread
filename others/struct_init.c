@@ -9,7 +9,7 @@ void main()
 
     /* 正确的初始化方法 */
     struct st st1={.num=1, .name="lcy"};
-    struct st st2={num:2, name:"fll"};
+    struct st st2={num: 2, name: "fll"};
 
     struct st st3={3, "boy"}; 
     /* 以上这种方式是非常危险的,原因在于你对结构的内存布局作了假设.
