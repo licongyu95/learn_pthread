@@ -98,3 +98,23 @@ int WCOREDUMP(status);
 #define _XOPEN_SOURCE
 #include<stdlib.h>
 int system(const char* command);
+
+/************ 改变实际用户(组)ID和保存设置用户(组)ID **********/
+#include<sys/types.h>
+#include<unistd.h>
+int setuid(uid_t uid);
+int setgid(gid_t gid);
+uid_t getuid(void);
+gid_t getgid(void);
+
+/********************* 改变有效用户(组)ID *********************/
+#include<sys/types.h>
+#include<unistd.h>
+int seteuid(uid_t euid);
+int setegid(gid_t egid);
+uid_t geteuid(void);
+gid_t getegid(void);
+/* 
+ * 非root用户应该使用seteuid来设置有效用户ID
+ * root用户使用setuid()
+ * /
