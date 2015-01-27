@@ -31,7 +31,7 @@ alarm_thread(void *arg)
             sleep_time = 1;
         else
         {
-            alarm_list = alarm->link;
+            alarm_list = alarm->link; //如果发现列表中有请求,则从列表中删除该请求,并处理该请求
             now = time(NULL);
             if(alarm->time <= now)
                 sleep_time = 0;
