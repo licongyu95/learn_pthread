@@ -15,8 +15,8 @@ alarm_thread(void *arg)
     status = pthread_detach(pthread_self());
     if (status != 0)
         err_abort(status, "Detach thread");
-    sleep(arlarm->seconds);
-    printf("(%d) %s\n", alarm->seconds, alarm->message)'
+    sleep(alarm->seconds);
+    printf("(%d) %s\n", alarm->seconds, alarm->message);
         free(alarm);
     return NULL;
 }

@@ -41,7 +41,8 @@ main(int argc, char *argv[])
                     pid = waitpid((pid_t)(-1), NULL, WNOHANG);
                     if (pid == (pid_t)(-1))
                         errno_abort("Wait for child");
-                }while(pid != (pid_t)(0))
+                }while(pid != (pid_t)(0));
             }
+        }
     }
 }

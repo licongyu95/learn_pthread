@@ -68,7 +68,7 @@ main(int argc, char *argv[])
     pthread_t thread;
 
     status = pthread_create(
-            *thread, NULL, alarm_thread, NULL);
+            &thread, NULL, alarm_thread, NULL);
     if(status != 0)
         err_abort(status, "Create alarm thread");
     while (1)
@@ -106,7 +106,7 @@ main(int argc, char *argv[])
                     break;
                 }
                 last = &next->link;
-                next = &next->link;
+                next = next->link;
             }
 
             if(next == NULL)
