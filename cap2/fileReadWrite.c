@@ -66,6 +66,65 @@ void writeFile(int fd, char*buf, size_t len)
     sync();
 }
 
+void preadFile(int fd, char* buf, size_t size, off_t pos)
+{
+	int ret;
+	ret = pread(fd, buf, size, pos);
+	if( ret == -1 )
+	perror("pread");
+	printf("pread read %d char(s)\n", ret);
+}
+
+void pwrite(int fd, char* buf, size_t size, off_t pos)
+{
+	int ret;
+	ret = pwrite(fd, buf, size, pos);
+	if( ret == -1 )
+	perror("pwrite");
+	printf("pwrite write %d char(s)\n", ret);
+}
+
+void lseekEnd(int fd)
+{
+	int ret;
+	ret = lseek(fd, (off_t)0, SEEK_END);
+	//ret = lseek(fd, (off_t)1024, SEEK_END);
+	if( ret == (off_t)-1 )
+	perror("lseek");
+}
+
+void lseekSet(int fd, off_t pos)
+{
+	int ret;
+	ret = lseek(fd, pos, SEEK_SET);
+	if( ret == (off_t)-1 )
+	perror("lseek");
+}
+
+void lseekCur(int fd)
+{
+	int ret;
+	ret = lseek(fd, (off_t)0, SEEK_CUR);
+	if( ret == (off_t)-1 )
+	perror("lseek");
+}
+
+void truncate (const char *path, off_t len)
+{
+	int ret;
+	ret = truncate (path, len);
+	if( ret == -1 )
+	perror("truncate");
+}
+
+void ftruncate (int fd, off_t len)
+{
+	int ret;
+	ret = ftruncate (fd, len);
+	if( ret == -1 )
+	perror("truncate");
+}
+
 void main(void)
 {
     int fd;
