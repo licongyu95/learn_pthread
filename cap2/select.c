@@ -15,7 +15,7 @@ void main(int argc, char* argv[])
 {
     int item;
     char* fileName;
-    int fd[READNUM + WRITENUM];
+    int fd[READNUM + WRITENUM] = {0,};
     fd_set* readfds = NULL;
     fd_set* writefds = NULL;
 
@@ -54,7 +54,7 @@ void main(int argc, char* argv[])
     }
 
     for( item=0; item < (WRITENUM + READNUM); item++ )
-        if( FD_ISSET(fd[item], readfds) || FD_ISSET(fd[item], readfds) )
+        if( FD_ISSET(fd[item], readfds) || FD_ISSET(fd[item], writefds) )
             printf("fd:%d\n", fd[item]);
     if(readfds)
         free(readfds);
@@ -62,5 +62,11 @@ void main(int argc, char* argv[])
         free(writefds);
     if(fileName)
         free(fileName);
+    for( item=0; item < (WRITENUM + READNUM); item++)
+        if( fd[item])
+        {
+            printf("close fd:%d\n", fd[item]);
+            close(fd[item]);
+        }
 
 }
