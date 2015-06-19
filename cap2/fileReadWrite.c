@@ -75,7 +75,7 @@ void preadFile(int fd, char* buf, size_t size, off_t pos)
 	printf("pread read %d char(s)\n", ret);
 }
 
-void pwrite(int fd, char* buf, size_t size, off_t pos)
+void pwriteFile(int fd, char* buf, size_t size, off_t pos)
 {
 	int ret;
 	ret = pwrite(fd, buf, size, pos);
@@ -109,7 +109,7 @@ void lseekCur(int fd)
 	perror("lseek");
 }
 
-void truncate (const char *path, off_t len)
+void trunca (const char *path, off_t len)
 {
 	int ret;
 	ret = truncate (path, len);
@@ -117,7 +117,7 @@ void truncate (const char *path, off_t len)
 	perror("truncate");
 }
 
-void ftruncate (int fd, off_t len)
+void ftrunc (int fd, off_t len)
 {
 	int ret;
 	ret = ftruncate (fd, len);
@@ -137,7 +137,8 @@ void main(void)
     fd = openFile();
     writeFile(fd, writeBuf, (size_t)strlen(writeBuf));
 
-    lseek(fd, 0, SEEK_SET);
+    //lseek(fd, 0, SEEK_SET);
+    lseekSet(fd, 0);
     readFile(fd, readBuf, (size_t)strlen(writeBuf));
     printf("readFile in func main:%s\n", readBuf);
     if( fd )
@@ -145,10 +146,9 @@ void main(void)
         {
             if(errno == EIO)
                 printf("EIO");
+            else
+                perror("close");
         }
-        else
-            perror("close");
-
 }
 
 
