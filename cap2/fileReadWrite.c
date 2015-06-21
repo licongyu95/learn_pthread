@@ -7,11 +7,22 @@
 #include<errno.h>
 #include<string.h>
 
-void readLine(void)
+void read_line(void)
 {
 }
 
-int openFile(void)
+/* open:
+ *
+ * #include <sys/types.h>
+ * #include <sys/stat.h>
+ * #include <fcntl.h>
+ *
+ * int open(const char *pathname, int flags);
+ * int open(const char *pathname, int flags, mode_t mode);
+ * int creat(const char *pathname, mode_t mode);
+ */
+
+int open_file(void)
 {
     int fd;
     fd = open("testFile.txt", O_RDWR|O_NONBLOCK|O_CREAT|O_SYNC, 
@@ -21,7 +32,12 @@ int openFile(void)
     return fd;
 }
 
-void readFile(int fd, char* buf, size_t size)
+/* read:
+ *
+ * #include <unistd.h>
+ * ssize_t read(int fd, void *buf, size_t count);
+ */
+void read_file(int fd, char* buf, size_t size)
 {
     int ret;
     printf("read fd:%d\n", fd);
@@ -40,7 +56,12 @@ void readFile(int fd, char* buf, size_t size)
     printf("readFile:%s\n", buf);
 }
 
-void writeFile(int fd, char*buf, size_t len)
+/* wiret:
+ *
+ * #include <unistd.h>
+ * ssize_t write(int fd, const void *buf, size_t count);
+ */
+void write_file(int fd, char*buf, size_t len)
 {
     int ret;
     printf("write fd:%d\n", fd);
@@ -66,7 +87,16 @@ void writeFile(int fd, char*buf, size_t len)
     sync();
 }
 
-void preadFile(int fd, char* buf, size_t size, off_t pos)
+/* pread/pwrite:
+ *
+ * Linux提供两种read()/write()的变体来代替lseek()：
+ * 每个调用都以需要读写的文件位置为参数.完成是,不修改文件位置.
+ *
+ * #include <unistd.h>
+ * ssize_t pread(int fd, void *buf, size_t count, off_t offset);
+ * ssize_t pwrite(int fd, const void *buf, size_t count, off_t offset);
+ */
+void pread_file(int fd, char* buf, size_t size, off_t pos)
 {
 	int ret;
 	ret = pread(fd, buf, size, pos);
@@ -75,7 +105,7 @@ void preadFile(int fd, char* buf, size_t size, off_t pos)
 	printf("pread read %d char(s)\n", ret);
 }
 
-void pwriteFile(int fd, char* buf, size_t size, off_t pos)
+void pwrite_file(int fd, char* buf, size_t size, off_t pos)
 {
 	int ret;
 	ret = pwrite(fd, buf, size, pos);
@@ -84,7 +114,14 @@ void pwriteFile(int fd, char* buf, size_t size, off_t pos)
 	printf("pwrite write %d char(s)\n", ret);
 }
 
-void lseekEnd(int fd)
+/* lseek:
+ *
+ * #include <sys/types.h>
+ * #include <unistd.h>
+ * 
+ * off_t lseek(int fd, off_t offset, int whence);
+ */
+void lseek_end(int fd)
 {
 	int ret;
 	ret = lseek(fd, (off_t)0, SEEK_END);
@@ -93,7 +130,7 @@ void lseekEnd(int fd)
 	perror("lseek");
 }
 
-void lseekSet(int fd, off_t pos)
+void lseek_set(int fd, off_t pos)
 {
 	int ret;
 	ret = lseek(fd, pos, SEEK_SET);
@@ -101,7 +138,7 @@ void lseekSet(int fd, off_t pos)
 	perror("lseek");
 }
 
-void lseekCur(int fd)
+void lseek_cur(int fd)
 {
 	int ret;
 	ret = lseek(fd, (off_t)0, SEEK_CUR);
@@ -109,6 +146,13 @@ void lseekCur(int fd)
 	perror("lseek");
 }
 
+/* truncate:
+ *
+ *  #include <unistd.h>
+ *  #include <sys/types.h>
+ *  int truncate(const char *path, off_t length);
+ *  int ftruncate(int fd, off_t length);
+ */
 void trunca (const char *path, off_t len)
 {
 	int ret;
