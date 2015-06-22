@@ -37,7 +37,7 @@ size_t readAnyBlocks(size_t blockSize, size_t blockNum, FILE* stream);
 void main(int argc, char* argv[])
 {
     FILE* stream = NULL;
-    int fd;
+    int fd, ret;
     char str[SIZE] = {0,};
 
     stream = fopen("./fopenTestFile", "w+");
@@ -53,9 +53,20 @@ void main(int argc, char* argv[])
     stream = fdopen(fd, "w+");
     if( !stream )
         perror("fdopen");
+    /* setvbuf:
+     *
+     * #include<stdio.h>
+     * int setvbuf(FILE *stream, char *buf, int mode, size_t size);
+     * 设置缓冲区为大小为size的buf.如果buf为空,由glibc自动分配.
+     * setvbuf()必须在打开流之后,但是在执行任何其他操作之前.
+     */
+    ret = setvbuf(stream, NULL, _IOFBF, 4096);
+    if( ret )
+        perror("setvbuf");
 
     readOneChar(stream);
     fseek(stream, 0, SEEK_SET);
+    /* rewind(stream); \/\* 重置流位置\*\/ */
 
     ungetOneChar('X', stream);
     fseek(stream, 0, SEEK_SET);
@@ -71,6 +82,19 @@ void main(int argc, char* argv[])
 
     readAnyChars(str, stream);
 
+    fflush(stream); /* 把流从用户层缓冲区刷入到内核缓冲区 */
+
+    /* fileno():
+     *
+     * #include <stdio.h>
+     * int fileno (FILE *stream);
+     * 获得关联fd
+     */
+    fd = fileno(stream);
+    fdatasync(fd);
+    fsync(fd);
+
+    sync(); /* 把所有内核缓冲区刷入硬盘 */
     fcloseall();
 }
 
@@ -178,6 +202,17 @@ size_t readAnyBlocks(size_t blockSize, size_t blockNum, FILE* stream)
     size_t ret;
     ret = fread(str, blockSize, blockNum, stream);
     if( ret != blockNum )
+        /* #include <stdio.h>
+         * int ferror (FILE *stream);
+         *
+         * #include <stdio.h>
+         * int feof (FILE *stream);
+         *
+         * #include <stdio.h>
+         * void clearerr (FILE *stream);
+         * clearerr()为流清空错误标志和文件结束标志.
+         * 只有检查了EOF和error标志之后才可以调用clearerr().
+         */
         if( feof(stream) || ferror(stream) )
             clearerr(stream);
     return blockNum;
