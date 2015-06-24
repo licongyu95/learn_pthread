@@ -11,7 +11,7 @@
 #define MAXEVENTS 64
 
 /* 函数:
- * 功能:创建和绑定一个TCP socket
+ * 功能:创建和绑定一个 TCP socket
  * 参数:端口
  * 返回值:创建的socket
  */
@@ -61,7 +61,7 @@ create_and_bind (char *port)
 
 
 /* 函数
- * 功能:设置socket为非阻塞的
+ * 功能:设置 socket 为非阻塞的
  */
     static int
 make_socket_non_blocking (int sfd)
@@ -71,8 +71,8 @@ make_socket_non_blocking (int sfd)
     /* 当你第一次调用 socket() 建立套接口描述符的时候,内核就将他设置为阻塞.
      * 如果你不想套接口阻塞,你就要调用函数 fcntl().
      * 通过设置套接口为非阻塞,你能够有效地"询问"套接口以获得信息.
-     * 但是一般来说轮询不是一个好主意,会浪费cpu时间,
-     * 更好的方法是用 select()方法去查询是否有数据要读进来.
+     * 但是一般来说轮询不是一个好主意,会浪费 cpu 时间,
+     * 更好的方法是用 select() 方法去查询是否有数据要读进来.
      */
     flags = fcntl (sfd, F_GETFL, 0); /* 得到文件状态标志 */
     if (flags == -1)
@@ -93,7 +93,7 @@ make_socket_non_blocking (int sfd)
     return 0;
 }
 
-/* 端口由参数argv[1]指定 */
+/* 端口由参数 argv[1] 指定 */
     int
 main (int argc, char *argv[])
 {
@@ -123,7 +123,7 @@ main (int argc, char *argv[])
         abort ();
     }
 
-    /* 除了参数size被忽略外,此函数和epoll_create完全相同 */
+    /* 除了参数 size 被忽略外,此函数和 epoll_create 完全相同 */
     efd = epoll_create1 (0);
     if (efd == -1)
     {
@@ -131,7 +131,7 @@ main (int argc, char *argv[])
         abort ();
     }
 
-    event.data.fd = sfd; /* gdb执行sfd==3 */
+    event.data.fd = sfd;
     event.events = EPOLLIN | EPOLLET;  /* 读入,边缘触发方式 */
     s = epoll_ctl (efd, EPOLL_CTL_ADD, sfd, &event);
     if (s == -1)
@@ -156,6 +156,7 @@ main (int argc, char *argv[])
         }
         for (i = 0; i < n; i++)
         {
+            /***************************************************************/
             if ((events[i].events & EPOLLERR) ||
                     (events[i].events & EPOLLHUP) ||
                     (!(events[i].events & EPOLLIN)))
@@ -166,9 +167,10 @@ main (int argc, char *argv[])
                 close (events[i].data.fd);
                 continue;
             }
-
-            else if (sfd == events[i].data.fd)
-            {
+            
+            /***************************************************************/
+            /* 如果 events 中的fd是 server fd,表明又有新的 socket 连接事件 */
+            else if (sfd == events[i].data.fd)             {
                 /* We have a notification on the listening socket, which
                  * means one or more incoming connections. */
                 while (1)
@@ -191,7 +193,9 @@ main (int argc, char *argv[])
                      * 如果你只想让一个连接进来,那么你可以使用 close()
                      * 去关闭原来的文件描述符 sfd 来避免同一个端口更多的连接.
                      */
-                    infd = accept (sfd, &in_addr, &in_len); /* sfd 为非阻塞socket */
+                    
+                    /* sfd 为非阻塞socket 所以如果没有新的 client 连接,循环结束.*/
+                    infd = accept (sfd, &in_addr, &in_len); 
                     if (infd == -1)
                     {
                         if ((errno == EAGAIN) ||
@@ -212,11 +216,13 @@ main (int argc, char *argv[])
                     s = getnameinfo (&in_addr, in_len,
                             hbuf, sizeof hbuf,
                             sbuf, sizeof sbuf,
-                            NI_NUMERICHOST | NI_NUMERICSERV);/* flag参数:以数字名返回主机地址和服务地址 */
+                            /* flag参数:以数字名返回主机地址和服务地址 */
+                            NI_NUMERICHOST | NI_NUMERICSERV);
 
                     if (s == 0)
                     {
-                        printf("Accepted connection on descriptor %d (host=%s, port=%s)\n", infd, hbuf, sbuf);
+                        printf("Accepted connection on descriptor %d \
+                                (host=%s, port=%s)\n", infd, hbuf, sbuf);
                     }
 
                     /* Make the incoming socket non-blocking and add it to the
@@ -224,7 +230,6 @@ main (int argc, char *argv[])
                     s = make_socket_non_blocking (infd);
                     if (s == -1)
                         abort ();
-
                     event.data.fd = infd;
                     event.events = EPOLLIN | EPOLLET;
                     /* add new socket into epoll */
@@ -235,8 +240,12 @@ main (int argc, char *argv[])
                         abort ();
                     }
                 }
+
+                /* sfd 为非阻塞socket 所以如果没有新的 client 连接,循环结束.*/
                 continue;
             }
+            /************************************************************************/
+            /* 如果 events 中的fd不是 server fd,表明是 client socket 有 IO 请求事件 */
             else
             {
                 /* We have data on the fd waiting to be read. Read and
@@ -246,6 +255,7 @@ main (int argc, char *argv[])
                  * data. */
                 int done = 0;
 
+                /* 循环处理 client 的数据,没有了就返回 */
                 while (1)
                 {
                     ssize_t count;
@@ -271,8 +281,8 @@ main (int argc, char *argv[])
                         break;
                     }
 
-                    /* Write the buffer to standard output */
-                    s = write (1, buf, count);
+                    /* Write the buffer back to client */
+                    s = write (events[i].data.fd, buf, count); /* 直接数据回写给client */
                     if (s == -1)
                     {
                         perror ("write");
@@ -294,8 +304,6 @@ main (int argc, char *argv[])
     }
 
     free (events);
-
     close (sfd);
-
     return EXIT_SUCCESS;
 }
