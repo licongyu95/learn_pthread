@@ -10,7 +10,12 @@
 
 #define MAXEVENTS 64
 
-static int
+/* 函数:
+ * 功能:创建和绑定一个TCP socket
+ * 参数:端口
+ * 返回值:创建的socket
+ */
+    static int
 create_and_bind (char *port)
 {
     struct addrinfo hints;
@@ -54,18 +59,29 @@ create_and_bind (char *port)
     return sfd;
 }
 
-static int
+
+/* 函数
+ * 功能:设置socket为非阻塞的
+ */
+    static int
 make_socket_non_blocking (int sfd)
 {
     int flags, s;
 
-    flags = fcntl (sfd, F_GETFL, 0); 
+    /* 当你第一次调用 socket() 建立套接口描述符的时候,内核就将他设置为阻塞.
+     * 如果你不想套接口阻塞,你就要调用函数 fcntl().
+     * 通过设置套接口为非阻塞,你能够有效地"询问"套接口以获得信息.
+     * 但是一般来说轮询不是一个好主意,会浪费cpu时间,
+     * 更好的方法是用 select()方法去查询是否有数据要读进来.
+     */
+    flags = fcntl (sfd, F_GETFL, 0); /* 得到文件状态标志 */
     if (flags == -1)
     {
         perror ("fcntl");
         return -1;
     }
 
+    /* 设置文件状态标志 */ 
     flags |= O_NONBLOCK;
     s = fcntl (sfd, F_SETFL, flags);
     if (s == -1)
@@ -77,7 +93,8 @@ make_socket_non_blocking (int sfd)
     return 0;
 }
 
-int
+/* 端口由参数argv[1]指定 */
+    int
 main (int argc, char *argv[])
 {
     int sfd, s;
@@ -106,6 +123,7 @@ main (int argc, char *argv[])
         abort ();
     }
 
+    /* 除了参数size被忽略外,此函数和epoll_create完全相同 */
     efd = epoll_create1 (0);
     if (efd == -1)
     {
@@ -113,8 +131,8 @@ main (int argc, char *argv[])
         abort ();
     }
 
-    event.data.fd = sfd; 
-    event.events = EPOLLIN | EPOLLET;
+    event.data.fd = sfd; /* gdb执行sfd==3 */
+    event.events = EPOLLIN | EPOLLET;  /* 读入,边缘触发方式 */
     s = epoll_ctl (efd, EPOLL_CTL_ADD, sfd, &event);
     if (s == -1)
     {
@@ -161,7 +179,19 @@ main (int argc, char *argv[])
                     char hbuf[NI_MAXHOST], sbuf[NI_MAXSERV];
 
                     in_len = sizeof(in_addr);
-                    infd = accept (sfd, &in_addr, &in_len);
+                    /*
+                     * accept函数指定服务端 sfd 去接受客户端的连接,
+                     * 接收后,返回了客户端套接字的标识.
+                     * 且获得了客户端套接字的"地方:in_addr"
+                     * (包括客户端IP和端口信息等).
+                     * accept函数如果没有客户端套接字去请求,便会阻塞.
+                     * 如果是非阻塞式的socket,那么accept函数会立即返回-1.
+                     * 注意:在系统调用 send() 和 recv() 中你应该使用
+                     * 新的套接字描述符 infd .
+                     * 如果你只想让一个连接进来,那么你可以使用 close()
+                     * 去关闭原来的文件描述符 sfd 来避免同一个端口更多的连接.
+                     */
+                    infd = accept (sfd, &in_addr, &in_len); /* sfd 为非阻塞socket */
                     if (infd == -1)
                     {
                         if ((errno == EAGAIN) ||
@@ -178,15 +208,15 @@ main (int argc, char *argv[])
                         }
                     }
 
+                    /* 将地址转化为主机名或者服务名 */
                     s = getnameinfo (&in_addr, in_len,
                             hbuf, sizeof hbuf,
                             sbuf, sizeof sbuf,
-                            NI_NUMERICHOST | NI_NUMERICSERV);
+                            NI_NUMERICHOST | NI_NUMERICSERV);/* flag参数:以数字名返回主机地址和服务地址 */
 
                     if (s == 0)
                     {
-                        printf("Accepted connection on descriptor %d \
-                                (host=%s, port=%s)\n", infd, hbuf, sbuf);
+                        printf("Accepted connection on descriptor %d (host=%s, port=%s)\n", infd, hbuf, sbuf);
                     }
 
                     /* Make the incoming socket non-blocking and add it to the
