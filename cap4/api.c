@@ -156,3 +156,39 @@ int posix_fadvise (int fd, off_t offset, off_t
 ssize_t readahead (int fd, off64_t offset, size_t
         count); /* 功能等同posix_fadvise()使用POSIXFADV_WILLNEED */
 
+/*************************其它使用的接口****************************/
+/*
+ * These  functions  return information about a file.
+ * No permissions are required on the file itself,
+ * but--in the case of stat() and lstat() -- exe-cute (search)
+ * permission is required on all of the directories in path that lead to the file.
+ */
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+int stat(const char *path, struct stat *buf);
+int fstat(int fd, struct stat *buf);
+int lstat(const char *path, struct stat *buf);
+struct stat{
+    dev_t     st_dev;     /* ID of device containing file */
+    ino_t     st_ino;     /* inode number */
+    mode_t    st_mode;    /* protection */
+    nlink_t   st_nlink;   /* number of hard links */
+    uid_t     st_uid;     /* user ID of owner */
+    gid_t     st_gid;     /* group ID of owner */
+    dev_t     st_rdev;    /* device ID (if special file) */
+    off_t     st_size;    /* total size, in bytes */
+    blksize_t st_blksize; /* blocksize for filesystem I/O */
+    blkcnt_t  st_blocks;  /* number of 512B blocks allocated */
+    time_t    st_atime;   /* time of last access */
+    time_t    st_mtime;   /* time of last modification */
+    time_t    st_ctime;   /* time of last status change */
+}
+
+#include<sys/ioctl.h>
+int ioctl (int fd, int request, ...);
+
+/* FIBMAP 根据fd获取文件的物理块 */
+ret = ioctl (fd, FIBMAP, &block);
+if (ret < 0)
+    perror (”ioctl”);
