@@ -216,7 +216,7 @@ main (int argc, char *argv[])
                  * data. */
                 int done = 0;
 
-                while (1)
+                while (1) /* 轮询处理完每个 socket 所有的 IO */
                 {
                     ssize_t count;
                     char buf[512];

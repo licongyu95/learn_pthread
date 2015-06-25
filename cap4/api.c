@@ -1,4 +1,4 @@
-/* 向量IO */
+/***************** 向量IO **********************/
 #include<sys/uio.h>
 ssize_t readv(int fd, const struct iovec *iov, int count);
 ssize_t writev(int fd, const struct iovec *iov, int count);
@@ -8,6 +8,8 @@ struct iovec {
     size_t iov_len;     /* Number of bytes to transfer */
 };
 
+
+/***************** event poll **********************/
 
 /* poll()/select()每次调用都需要所有被监听的文件描述符.
  * 内核必须遍历所有的文件描述符.
@@ -79,4 +81,78 @@ void epoll_wait2(int epfd, struct epoll_event *events, int maxevents, int timeou
     if( ret == -1 )
         perror("epoll_wait");
 }
+
+
+/***************************** 内存映射 ****************************/
+#include <sys/mman.h>
+void *mmap(void *addr, size_t length, int prot, int flags,
+        int fd, off_t offset);
+/* prot:
+ * PROT_READ 页面可读
+ * PROT_WRITE 页面可写
+ * PROT_EXEC 页面可执行
+ *
+ * flags:
+ * MAP_FIXED
+ * MAP_SHARED
+ * MAP_PRIVATE
+ */
+
+/* 删除映射 */
+#include <sys/mman.h>
+int munmap (void *addr, size_t len);
+
+/* 同步映射文件 */
+#include<sys/mman.h>
+int msync (void *addr, size_t len, int flags);
+/* flags:
+ * MS_ASYNC 异步
+ * MS_SYNC 同步
+ * MS_INVALIDATE
+ */
+
+/* 重映射 */
+#define _GNU_OURCE
+#include <unistd.h>
+#include <sys/mman.h>
+void * mremap (void *addr, size_t old_size,
+        size_t new_size, unsigned long flags);
+
+/* 改变映射区域权限 */
+#include<sys/mman.h>
+int mprotect (const void *addr, size_t len, int prot);
+
+/* 映射提示 */
+/* 应用程序提醒内核应用程序将如何访问内核 
+ * MADV_NORMAL
+ * MADV_RANDOM
+ * MADV_SEQUENTIAL
+ * MADV_WILLNEED
+ * MADV_DONTNEED
+ */
+#include<sys/mman.h>
+int madvise (void *addr, size_t len, int advice);
+
+/* 获取系统信息 */
+#include <unistd.h>
+long sysconf (int name); /* 返回系统特定的信息 */
+/* eg:
+ * long page_size = sysconf(_SC_PAGESIZE) \/* 返回系统页大小 *\/
+ */
+
+/******************普通文件IO提示**********************/
+#include <fcntl.h>
+int posix_fadvise (int fd, off_t offset, off_t
+        len, int advice);
+/* POSIXFADV_NORMAL
+ * POSIXFADV_RANDOM
+ * POSIXFADV_SEQUENTIAL
+ * POSIXFADV_WILLNEED
+ * POSIXFADV_NOREUSE
+ * POSIXFADV_DONTNEED
+ */
+
+#include <fcntl.h>
+ssize_t readahead (int fd, off64_t offset, size_t
+        count); /* 功能等同posix_fadvise()使用POSIXFADV_WILLNEED */
 
