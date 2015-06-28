@@ -3,6 +3,7 @@
 #include<stdio.h>
 #include<fcntl.h>
 #include<grp.h>
+#include<errno.h>
 
 void main()
 {
@@ -17,12 +18,16 @@ void main()
         return;
     }
 
+    errno = 0;
+
     gr = getgrnam("api.c");
+    /*
     if (!gr)
     {
         perror("getgrnam");
         return;
     }
+    */
 
     ret = fchown(fd, -1, -1);
     if (ret)
@@ -31,7 +36,8 @@ void main()
         return;
     }
 
-    ret = fchown(fd, -1, gr->gr_gid);
+    /* ret = fchown(fd, -1, gr->gr_gid); */
+    ret = fchown(fd, 0, 0);
     if (ret)
     {
         perror("fchown");
