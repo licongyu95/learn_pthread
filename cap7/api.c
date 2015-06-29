@@ -83,3 +83,67 @@ int removexattr(const char *path, const char *key);
 int lremovexattr(const char *path, const char *key);
 int fremovexattr(int fd, const char *key);
 
+/***********************目录***************************/
+/* 获取当前目录 */
+#include<unistd.h>
+char* getcwd(char *buf, size_t size);
+/* glibc的方式: */
+#define _GNU_SOURCE
+#include<unistd.h>
+char* get_current_dir_name(void);
+
+/* 更改当前目录 */
+#include<unistd.h>
+int chdir(const char* path);
+int fchdir(int fd);
+
+
+/* 创建目录 */
+#include<sys/stat.h>
+#include<sys/types.h>
+int mkdir(const char* path, mode_t mode);
+
+/* 移除目录 */
+#include<unistd.h>
+int rmdir(const char* path);
+
+/* 读取目录内容 */
+#include<sys/types.h>
+#include<dirent.h>
+DIR* opendir(const char* name); /* 打开目录流 */
+
+/* 从目录流中获取目录文件描述符 */
+#define _BSD_SOURCE 
+#include<sys/types.h>
+#include<dirent.h>
+int dirfd(DIR* dir);
+
+/* 从目录流读取 */
+#include<sys/types.h>
+#include<dirent.h>
+struct dirent* readdir(DIR* dir);
+struct dirent{
+    ino_t d_ino;
+    off_t d_off;
+    unsigned short d_reclen;
+    unsigned char d_type;
+    char d_name[256]; /* 文件名字 */
+}
+
+/* 关闭目录流 */
+#include<dirent.h>
+#include<sys/types.h>
+int closedir(DIR* dir);
+
+/* 对应的系统调用,一般不用 */
+#include<unistd.h>
+#include<linux/types.h>
+#include<linux/dirent.h>
+#include<linux/unistd.h>
+#include<errno.h>
+
+int readdir(unsigned int fd, struct dirent* dirp
+        unsigned int count);
+int getdents(unsigned int fd, struct dirent* dirp
+        unsigned int count);
+
