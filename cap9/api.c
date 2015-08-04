@@ -61,22 +61,52 @@ int sigpending(sigset_t* set);
 #include<signal.h>
 int sigsuspend(const sigset_t* set);
 
-/* advanced signal manager */
+/********************** 高级型号管理  *********************/
+/* 信号安装函数 */
 #include<signal.h>
 int sigaction(int signo,
         const struct sigaction* act,
         struct sigaction* oldact);
-struct sigaction{
-    void (*sa_handler) (int);
-    void (*sa_sigaction) (int, siginfo_t*, void);
-    sigset_t sa_mask;
+
+struct sigaction {
+    void (*sa_handler) (int); /* 信号处理函数 */
+    /*原型 void my_handler (int signo); */
+    void (*sa_sigaction) (int, siginfo_t*, void); /* 信号处理函数 */
+    /*原型 void my_handler(int signo, siginfo_t *si, void *ucontext) */
+    sigset_t sa_mask; /* 阻塞的信号 */
     int sa_flags;
-    void (*sa_restorer) (void);
+    /* 标志.  如果等于SA SIGINFO, 处理程序使用sa_sigaction函数
+     * SA_NODEFER
+     * SA_NOCLDSTOP
+     * SA_NOCLDWAIT
+     * SA_ONSTACK
+     * SA_RESTART
+     * SA_RESETHAND
+     */
+    void (*sa_restorer) (void); /* 不再可用 */
 }
 
-/*
- * sa_sigaction:
- * void my_handler(int signo, siginfo_t* si, void* ucontext);
- */
+typedef struct siginfo_t {
+    int si_signo; /* 信号编号 */
+    int si_errno; /* 信号有关的错误代码 */
+    int si_code; /* 解释信号的来源 */
+    pid_t si_pid;
+    uid_t si_uid;
+    int si_status;
+    clock_t si_utime;
+    clock_t si_stime;
+    sigval_t si_value;
+    int si_int;
+    void *si_ptr;
+    void *si_addr;
+    int si_band;
+    int si_fd;
+}
 
-
+/* 带附加信息的信号发送 */
+#include<signal.h>
+int sigqueue(pid_t pid, int signo, const union sigval value);
+union sigval {
+    int sival_int;
+    void* sival_ptr;
+}
