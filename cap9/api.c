@@ -38,7 +38,7 @@ int raise(int signo);
 int killpg(int pgrp, int signo);
 // killpg(pgrp, signo) == kill(-pgrp, signo)
 
-/* signal set */
+/* 信号集 */
 #include<signal.h>
 int sigemptyset(sigset_t *set);
 int sigfillset(sigset_t *set);
@@ -48,20 +48,27 @@ int sigismember(const sigset_t* set, int signo);
 #define _GNU_SOURCE
 #define <signal.h>
 int sigisemptyset(sigset_t* set);
-int sigorset(sigset_t* dest, sigset_t* left, sigset_t* right);
-int sigandset(sigset_t* dest, sigset_t* left, sigset_t* right);
+int sigorset(sigset_t* dest, sigset_t* left, sigset_t* right); /* left right的并集 */
+int sigandset(sigset_t* dest, sigset_t* left, sigset_t* right); /* left right的交集 */
 
-/* puase signal */
+/* 信号阻塞 */
 #include<signal.h>
 int sigprocmask(int how, const sigset_t* set, sigset_t* oldset);
-/* get puased signal */
+/*
+ * how:
+ * SIG_SETMASK
+ * SIG_BLOCK
+ * SIG_UNBLOCK
+ */
+
+/* 获取待处理信号 */
 #include<signal.h>
 int sigpending(sigset_t* set);
 
 #include<signal.h>
 int sigsuspend(const sigset_t* set);
 
-/********************** 高级型号管理  *********************/
+/********************** 高级信号管理  *********************/
 /* 信号安装函数 */
 #include<signal.h>
 int sigaction(int signo,
