@@ -11,10 +11,13 @@ void main()
     sigemptyset(&act.sa_mask);
     act.sa_flags=SA_SIGINFO;
     act.sa_sigaction=(void*)my_op;
+
     if(sigaction(SIGRTMIN+10,&act,NULL))
         printf("install signal SIGRTMIN+10 error\n");
+
     sigemptyset(&new_mask);
     sigaddset(&new_mask,SIGRTMIN+10);
+
     if(sigprocmask(SIG_BLOCK, &new_mask,&old_mask))
         printf("block signal SIGRTMIN+10 error\n");
     sleep(10);
