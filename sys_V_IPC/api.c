@@ -37,7 +37,7 @@ int msgget(key_t key, int flag); /* 成功返回队列ID */
 int msgctl(int msqid, int cmd, struct msqid_ds buf);
 /*
  * cmd:
- * IPC_STAT 获取队列的msqid_ds, 存入buf
+ * IPC_STAT 获取队列msqid_ds的属性, 存入buf
  * IPC_SET 按buf指定的值设置msqid_ds
  * IPC_RMID
  */
