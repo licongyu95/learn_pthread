@@ -49,6 +49,10 @@ int msgctl(int msqid, int cmd, struct msqid_ds buf);
 int msgsend(int msqid, const void *ptr, size_t nbytes, int flag);
 /*
  * ptr指向一个长整型数, 它包含了正整型消息类型, 在其后立即更随了消息数据
+ * 与一个队列中的每个消息相关联的类型字段提供了两个特性：
+ * (1)类型字段可以用于标识消息,从而允许多个进程在单个队列上复用消息
+ * (2)类型字段可以用做优先级,允许接收者以不同于先进先出的某个顺序读出各个消息
+ *
  * struct mymesg {
  *     long mtype;
  *     char mtext[512];
